@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "ES2015",
+    "sourceMap": true,
+    "experimentalDecorators": true,
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "declaration": true,
+    "outDir": "build"
+  },
+  "include": ["src/", "test/"],
+  "exclude": ["node_modules"]
+}
