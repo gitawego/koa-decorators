@@ -1,15 +1,18 @@
 import { Controller, Get, Post } from '../../src/router';
-
+import { ServerSettings } from '../../src/ServerSetting';
+import Koa from 'koa';
 @ServerSettings({
   port: 3000,
   host: '0.0.0.0'
 })
-class Server extends ServerLoader {
+class Server {
+  server: Koa;
   // public async initPlugins() {
   //   // await this.server.register(inert);
   // }
+  onServerFailed(err: any) {}
   onServerStarted() {
-    console.log(`server started at ${this.server.info.uri}`);
+    console.log(`server started `);
   }
 }
 

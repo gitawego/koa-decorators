@@ -24,7 +24,7 @@ async function formatResponse(descriptor: any, ctx: Context) {
   }
 }
 
-const router = new Router();
+export const router = new Router();
 
 export function Controller(path: string, middleware: Middleware[] = []) {
   return (target: any) => {
