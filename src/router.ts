@@ -1,5 +1,5 @@
 import { Context, Middleware } from 'koa';
-import * as Router from 'koa-router';
+import Router from 'koa-router';
 
 export enum HttpMethod {
   HEAD,
