@@ -1,4 +1,4 @@
-import { Context, Middleware } from 'koa';
+import { Middleware } from 'koa';
 import Router from 'koa-router';
 
 export enum HttpMethod {
@@ -12,34 +12,23 @@ export enum HttpMethod {
   ALL
 }
 
-async function formatResponse(descriptor: any, ctx: Context) {
-  const ret = descriptor.value(ctx);
-  if (ret != null) {
-    const data = await Promise.resolve(ret);
-    if (data != null) {
-      ctx.body = {
-        data
-      };
-    }
-  }
-}
-
 export const router = new Router();
 
-export function Controller(path: string, middleware: Middleware[] = []) {
-  return (target: any) => {
-    if (!target.prototype.router) {
-      target.prototype.router = new Router();
-    }
-    if (middleware.length > 0) {
-      target.prototype.router.use(...middleware);
-    }
-    router.use(
-      path,
-      target.prototype.router.routes(),
-      target.prototype.router.allowedMethods()
-    );
-    return;
+export function Controller(path: string, middlewares: Middleware[] = []) {
+  return <T extends { new (...args: any[]): {} }>(constructor: T) => {
+    return class extends constructor {
+      router: Router;
+      constructor(...args: any[]) {
+        super(...args);
+        if (!this.router) {
+          this.router = new Router();
+        }
+        if (middlewares.length > 0) {
+          this.router.use(...middlewares);
+        }
+        router.use(path, this.router.routes(), this.router.allowedMethods());
+      }
+    };
   };
 }
 
@@ -54,34 +43,32 @@ export function Route(
     if (!target.router) {
       target.router = new Router();
     }
-    const handleReturnMiddleware = async (ctx: Context) => {
-      await formatResponse(descriptor, ctx);
-    };
+    const fnc = target[key].bind(target);
     // Decorator applied to member (method or property).
     switch (method) {
       case HttpMethod.HEAD:
-        target.router.head(path, ...middleware, handleReturnMiddleware);
+        target.router.head(path, ...middleware, fnc);
         break;
       case HttpMethod.OPTIONS:
-        target.router.options(path, ...middleware, handleReturnMiddleware);
+        target.router.options(path, ...middleware, fnc);
         break;
       case HttpMethod.GET:
-        target.router.get(path, ...middleware, handleReturnMiddleware);
+        target.router.get(path, ...middleware, fnc);
         break;
       case HttpMethod.PUT:
-        target.router.put(path, ...middleware, handleReturnMiddleware);
+        target.router.put(path, ...middleware, fnc);
         break;
       case HttpMethod.PATCH:
-        target.router.patch(path, ...middleware, handleReturnMiddleware);
+        target.router.patch(path, ...middleware, fnc);
         break;
       case HttpMethod.POST:
-        target.router.post(path, ...middleware, handleReturnMiddleware);
+        target.router.post(path, ...middleware, fnc);
         break;
       case HttpMethod.DELETE:
-        target.router.del(path, ...middleware, handleReturnMiddleware);
+        target.router.del(path, ...middleware, fnc);
         break;
       default:
-        target.router.all(path, ...middleware, handleReturnMiddleware);
+        target.router.all(path, ...middleware, fnc);
         break;
     }
   };

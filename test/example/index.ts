@@ -1,15 +1,12 @@
 import { Controller, Get, Post } from '../../src/router';
-import { ServerSettings } from '../../src/ServerSetting';
-import Koa from 'koa';
+import { ServerSettings, ServerLoader } from '../../src/ServerSetting';
+import Koa, { Context } from 'koa';
 @ServerSettings({
   port: 3000,
   host: '0.0.0.0'
 })
-class Server {
+class Server extends ServerLoader {
   server: Koa;
-  // public async initPlugins() {
-  //   // await this.server.register(inert);
-  // }
   onServerFailed(err: any) {}
   onServerStarted() {
     console.log(`server started `);
@@ -17,13 +14,12 @@ class Server {
 }
 
 @Controller('/api/user')
-class UserApi extends Api {
-  constructor(private id: string) {
-    super();
-  }
-  @Get('')
-  getUserById() {
-    return this.id;
+class UserApi {
+  constructor(private id: string) {}
+  @Get('/')
+  async getUserById(ctx: Context, next: any) {
+    ctx.body = this.id;
+    await next();
   }
 
   @Post('/{id}')
@@ -33,10 +29,11 @@ class UserApi extends Api {
 }
 
 @Controller('/api/vote')
-class Vote extends Api {
+class Vote {
   @Get('/all')
-  getAllVotes(req: Request, h: ResponseToolkit) {
-    // ...
+  async getAllVotes(ctx: Context, next: any) {
+    ctx.body = 'all';
+    await next();
   }
   @Post('')
   addVote() {
