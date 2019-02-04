@@ -14,6 +14,11 @@ export enum HttpMethod {
 
 export const router = new Router();
 
+/**
+ * applied to class
+ * @param path
+ * @param middlewares
+ */
 export function Controller(path: string, middlewares: Middleware[] = []) {
   return <T extends { new (...args: any[]): {} }>(constructor: T) => {
     return class extends constructor {
@@ -39,12 +44,10 @@ export function Route(
   middleware: Middleware[] = []
 ) {
   return (target: any, key?: string | symbol, descriptor?: any): void => {
-    // Decorator applied to Class (for Constructor injection).
     if (!target.router) {
       target.router = new Router();
     }
     const fnc = target[key].bind(target);
-    // Decorator applied to member (method or property).
     switch (method) {
       case HttpMethod.HEAD:
         target.router.head(path, ...middleware, fnc);
