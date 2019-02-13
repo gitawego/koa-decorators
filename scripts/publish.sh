@@ -29,7 +29,7 @@ select version_type in "patch" "minor" "major"; do
 done
 
 
-read -p "Ready to publish @ichainml/hapi-decorators@$version. [Enter] to continue"
+read -p "Ready to publish koa-decorators@$version. [Enter] to continue"
 cp package.json README.md ./dist/
 
 cd ./dist/

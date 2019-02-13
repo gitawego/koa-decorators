@@ -3,38 +3,28 @@
 ## usage
 
 ```ts
-import {
-  Controller,
-  Get,
-  Post,
-  ServerSettings,
-  ServerLoader,
-  Api
-} from '@ichainml/hapi-decorators';
-import { Request, ResponseToolkit } from 'hapi';
-
+import { Controller, Get, Post } from '../../src/router';
+import { ServerSettings, ServerLoader } from '../../src/ServerSetting';
+import Koa, { Context } from 'koa';
 @ServerSettings({
   port: 3000,
   host: '0.0.0.0'
 })
 class Server extends ServerLoader {
-  // public async initPlugins() {
-  //   // await this.server.register(inert);
-  // }
+  server: Koa;
+  onServerFailed(err: any) {}
   onServerStarted() {
-    console.log(`server started at ${this.server.info.uri}`);
+    console.log(`server started `);
   }
 }
 
-/** for each controller, it must extend class ``Api`` */
 @Controller('/api/user')
-class UserApi extends Api {
-  constructor(private id: string) {
-    super();
-  }
-  @Get('')
-  getUserById() {
-    return this.id;
+class UserApi {
+  constructor(private id: string) {}
+  @Get('/')
+  async getUserById(ctx: Context, next: any) {
+    ctx.body = this.id;
+    await next();
   }
 
   @Post('/{id}')
@@ -44,10 +34,11 @@ class UserApi extends Api {
 }
 
 @Controller('/api/vote')
-class Vote extends Api {
+class Vote {
   @Get('/all')
-  getAllVotes(req: Request, h: ResponseToolkit) {
-    // ...
+  async getAllVotes(ctx: Context, next: any) {
+    ctx.body = 'all';
+    await next();
   }
   @Post('')
   addVote() {
@@ -55,7 +46,6 @@ class Vote extends Api {
   }
 }
 
-/** all the endpoints must be instantiated before server start. */
 const user = new UserApi('test');
 const vote = new Vote();
 console.log(user, vote);
